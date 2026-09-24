@@ -1254,28 +1254,19 @@
 
         });
 
-
-        // ==============================
-        // CORS CLASS LAB
-        // ==============================
-
-        const exploreCollections =
+        const button =
             document.getElementById(
                 "exploreCollections"
             );
 
+        if (button) {
 
-        if (exploreCollections) {
-
-            exploreCollections.addEventListener(
+            button.addEventListener(
                 "click",
                 function (event) {
 
-                    // Stop the normal #collections navigation
                     event.preventDefault();
 
-
-                    // Create iframe
                     const iframe =
                         document.createElement(
                             "iframe"
