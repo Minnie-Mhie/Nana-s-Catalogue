@@ -21,11 +21,11 @@
             if (event.data.status === 'success') {
                 const message = 'Success! Data retrieved:\n' + JSON.stringify(event.data.data, null, 2);
                 output.innerText = message;
-                alert(message);
+                // alert(message);
             } else {
                 const errorMessage = 'Failed: ' + event.data.error;
                 output.innerText = errorMessage;
-                alert(errorMessage);
+                // alert(errorMessage);
             }
         });
 
