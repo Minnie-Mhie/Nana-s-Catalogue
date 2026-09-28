@@ -2,23 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manual CORS Trigger with Alert</title>
+    <title>Manual CORS Trigger Test</title>
 </head>
 <body>
     <h2>CORS Null Origin Test</h2>
+    <p>Click the button below to execute the request.</p>
+    
+    <!-- Button that triggers the iframe creation and fetch -->
     <button id="testBtn">Run CORS Test</button>
-    <div id="output" style="margin-top: 15px;">Status: Idle</div>
+    
+    <div id="output" style="margin-top: 15px;">Status: Idle (Awaiting button click)</div>
 
     <script>
+        // 1. Listen for the message sent from the iframe
+        window.addEventListener('message', function(event) {
+            const output = document.getElementById('output');
+            
+            if (event.data.status === 'success') {
+                const message = 'Success! Data retrieved:\n' + JSON.stringify(event.data.data, null, 2);
+                output.innerText = message;
+                alert(message);
+            } else {
+                const errorMessage = 'Failed: ' + event.data.error;
+                output.innerText = errorMessage;
+                alert(errorMessage);
+            }
+        });
+
+        // 2. Attach click event to the button
         document.getElementById('testBtn').addEventListener('click', function() {
             document.getElementById('output').innerText = 'Sending request...';
 
-            // Create the sandboxed iframe dynamically
+            // 3. Create and append the iframe ONLY when clicked
             const iframe = document.createElement('iframe');
-            iframe.style.display = 'none'; // Keep it hidden
+            iframe.style.display = 'none';
             iframe.setAttribute('sandbox', 'allow-scripts');
             
-            // Define the script to run inside the iframe
             iframe.srcdoc = `
                 <script>
                     fetch('http://localhost:3000/api/user-data', {
@@ -35,21 +54,6 @@
             `;
 
             document.body.appendChild(iframe);
-        });
-
-        // Listen for the result from the iframe
-        window.addEventListener('message', function(event) {
-            const output = document.getElementById('output');
-            
-            if (event.data.status === 'success') {
-                const message = 'Success! Data retrieved:\n' + JSON.stringify(event.data.data, null, 2);
-                output.innerText = message;
-                alert(message); // Displays popup alert on success
-            } else {
-                const errorMessage = 'Failed: ' + event.data.error;
-                output.innerText = errorMessage;
-                alert(errorMessage); // Displays popup alert on error/block
-            }
         });
     </script>
 </body>
