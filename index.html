@@ -2,58 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manual CORS Trigger Test</title>
+    <title>Manual CORS Trigger</title>
 </head>
 <body>
     <h2>CORS Null Origin Test</h2>
-    <p>Click the button below to execute the request.</p>
-    
-    <!-- Button that triggers the iframe creation and fetch -->
     <button id="testBtn">Run CORS Test</button>
-    
-    <div id="output" style="margin-top: 15px;">Status: Idle (Awaiting button click)</div>
+    <div id="output" style="margin-top: 15px;">Status: Idle</div>
 
     <script>
-        // 1. Listen for the message sent from the iframe
-        window.addEventListener('message', function(event) {
-            const output = document.getElementById('output');
-            
-            if (event.data.status === 'success') {
-                const message = 'Success! Data retrieved:\n' + JSON.stringify(event.data.data, null, 2);
-                output.innerText = message;
-                // alert(message);
-            } else {
-                const errorMessage = 'Failed: ' + event.data.error;
-                output.innerText = errorMessage;
-                // alert(errorMessage);
-            }
-        });
-
-        // 2. Attach click event to the button
         document.getElementById('testBtn').addEventListener('click', function() {
             document.getElementById('output').innerText = 'Sending request...';
 
-            // 3. Create and append the iframe ONLY when clicked
+            // Create the sandboxed iframe dynamically
             const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
+            iframe.style.display = 'none'; // Keep it hidden
             iframe.setAttribute('sandbox', 'allow-scripts');
             
+            // Define the script to run inside the iframe
             iframe.srcdoc = `
                 <script>
                     fetch('http://localhost:3000/api/user-data', {
                         method: 'GET',
                         credentials: 'include'
                     })
-                    .then(res => {
-                        if (!res.ok) throw new Error('HTTP error ' + res.status);
-                        return res.json();
-                    })
+                    .then(res => res.json())
                     .then(data => window.parent.postMessage({ status: 'success', data }, '*'))
                     .catch(err => window.parent.postMessage({ status: 'error', error: err.message }, '*'));
                 <\/script>
             `;
 
             document.body.appendChild(iframe);
+        });
+
+        // Listen for the result from the iframe
+        window.addEventListener('message', function(event) {
+            const output = document.getElementById('output');
+            if (event.data.status === 'success') {
+                output.innerText = 'Success! Data retrieved: ' + JSON.stringify(event.data.data);
+            } else {
+                output.innerText = 'Failed: ' + event.data.error;
+            }
         });
     </script>
 </body>
