@@ -2,47 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manual CORS Trigger</title>
+    <title>Classroom CORS Test</title>
 </head>
 <body>
     <h2>CORS Null Origin Test</h2>
-    <button id="testBtn">Run CORS Test</button>
+
+    <!-- 1. The Button -->
+    <button id="exploreCollections">Run CORS Test</button>
+    
     <div id="output" style="margin-top: 15px;">Status: Idle</div>
 
-    <script>
-        document.getElementById('testBtn').addEventListener('click', function() {
-            document.getElementById('output').innerText = 'Sending request...';
-
-            // Create the sandboxed iframe dynamically
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none'; // Keep it hidden
-            iframe.setAttribute('sandbox', 'allow-scripts');
-            
-            // Define the script to run inside the iframe
-            iframe.srcdoc = `
-                <script>
+    <!-- 2. The Sandboxed Iframe (with the target script inside srcdoc) -->
+    <iframe sandbox="allow-scripts" style="display:none;" srcdoc="
+        <script>
+            // Listen for the 'trigger' message sent from the main page
+            window.addEventListener('message', function(event) {
+                if (event.data === 'trigger') {
+                    // Send cross-origin request (Origin will be 'null')
                     fetch('http://localhost:3000/api/user-data', {
                         method: 'GET',
                         credentials: 'include'
                     })
-                    .then(res => res.json())
-                    .then(data => window.parent.postMessage({ status: 'success', data }, '*'))
-                    .catch(err => window.parent.postMessage({ status: 'error', error: err.message }, '*'));
-                <\/script>
-            `;
+                    .then(res => {
+                        if (!res.ok) throw new Error('HTTP status ' + res.status);
+                        return res.json();
+                    })
+                    .then(data => {
+                        // Pass success data back to top window
+                        window.top.postMessage({ status: 'success', data: data }, '*');
+                    })
+                    .catch(err => {
+                        // Pass error back to top window
+                        window.top.postMessage({ status: 'error', error: err.message }, '*');
+                    });
+                }
+            });
+        <\/script>
+    "></iframe>
 
-            document.body.appendChild(iframe);
-        });
-
-        // Listen for the result from the iframe
+    <!-- 3. Your Classroom Script + Main Window Listener -->
+    <script>
+        // Listen for results coming back from the iframe
         window.addEventListener('message', function(event) {
+            // Ignore the 'trigger' message sent to itself
+            if (event.data === 'trigger') return;
+
             const output = document.getElementById('output');
             if (event.data.status === 'success') {
-                output.innerText = 'Success! Data retrieved: ' + JSON.stringify(event.data.data);
-            } else {
-                output.innerText = 'Failed: ' + event.data.error;
+                const result = 'Success! Data retrieved:\n' + JSON.stringify(event.data.data, null, 2);
+                output.innerText = result;
+                alert(result);
+            } else if (event.data.status === 'error') {
+                const errResult = 'Failed: ' + event.data.error;
+                output.innerText = errResult;
+                alert(errResult);
             }
         });
+
+        // --- CLASSROOM SCRIPT ---
+        function triggerFrame() {
+            const iframe = document.querySelector('iframe[sandbox]');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage('trigger', '*');
+            }
+        }
+
+        const button = document.getElementById("exploreCollections");
+        if (button) {
+            button.addEventListener("click", triggerFrame);
+        }
     </script>
 </body>
 </html>
