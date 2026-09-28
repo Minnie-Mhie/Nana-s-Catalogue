@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manual CORS Trigger</title>
+    <title>Manual CORS Trigger with Alert</title>
 </head>
 <body>
     <h2>CORS Null Origin Test</h2>
@@ -25,7 +25,10 @@
                         method: 'GET',
                         credentials: 'include'
                     })
-                    .then(res => res.json())
+                    .then(res => {
+                        if (!res.ok) throw new Error('HTTP error ' + res.status);
+                        return res.json();
+                    })
                     .then(data => window.parent.postMessage({ status: 'success', data }, '*'))
                     .catch(err => window.parent.postMessage({ status: 'error', error: err.message }, '*'));
                 <\/script>
@@ -37,10 +40,15 @@
         // Listen for the result from the iframe
         window.addEventListener('message', function(event) {
             const output = document.getElementById('output');
+            
             if (event.data.status === 'success') {
-                output.innerText = 'Success! Data retrieved: ' + JSON.stringify(event.data.data);
+                const message = 'Success! Data retrieved:\n' + JSON.stringify(event.data.data, null, 2);
+                output.innerText = message;
+                alert(message); // Displays popup alert on success
             } else {
-                output.innerText = 'Failed: ' + event.data.error;
+                const errorMessage = 'Failed: ' + event.data.error;
+                output.innerText = errorMessage;
+                alert(errorMessage); // Displays popup alert on error/block
             }
         });
     </script>
